@@ -212,6 +212,9 @@ def config_eos(
     monkeypatch,
 ) -> ConfigEOS:
     """Fixture to reset EOS config to default values."""
+    # Override EOS_DATA_DIR and EOS_CONFIG_DIR to use test temp directories
+    monkeypatch.setenv("EOS_DATA_DIR", str(config_default_dirs[-1] / "data"))
+    monkeypatch.setenv("EOS_CONFIG_DIR", str(config_default_dirs[0]))
     monkeypatch.setenv(
         "EOS_CONFIG__DATA_CACHE_SUBPATH", str(config_default_dirs[-1] / "data/cache")
     )
@@ -222,6 +225,14 @@ def config_eos(
     config_file_cwd = config_default_dirs[1] / ConfigEOS.CONFIG_FILE_NAME
     assert not config_file.exists()
     assert not config_file_cwd.exists()
+
+    # Reset singleton instance and class variables to ensure recreation with test paths
+    ConfigEOS.reset_instance()
+    # Also reset GeneralSettings class variables that cache paths
+    from akkudoktoreos.config.config import GeneralSettings
+
+    GeneralSettings._config_folder_path = None
+    GeneralSettings._config_file_path = None
 
     config_eos = get_config()
     config_eos.reset_settings()

@@ -168,6 +168,7 @@ def test_get_config_file_path(user_config_dir_patch, config_eos, config_default_
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
+        monkeypatch.delenv("EOS_CONFIG_DIR", raising=False)  # Clear fixture's EOS_CONFIG_DIR
         monkeypatch.setenv("EOS_DIR", str(temp_dir_path))
         assert config_eos._get_config_file_path() == (cfg_file(temp_dir_path), False)
 
@@ -199,6 +200,7 @@ def test_config_copy(config_eos, monkeypatch):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_folder_path = Path(temp_dir)
         temp_config_file_path = temp_folder_path.joinpath(config_eos.CONFIG_FILE_NAME).resolve()
+        monkeypatch.delenv("EOS_CONFIG_DIR", raising=False)  # Clear fixture's EOS_CONFIG_DIR
         monkeypatch.setenv(config_eos.EOS_DIR, str(temp_folder_path))
         assert not temp_config_file_path.exists()
         with patch("akkudoktoreos.config.config.user_config_dir", return_value=temp_dir):
